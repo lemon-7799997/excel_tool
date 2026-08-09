@@ -1,0 +1,20 @@
+[package]
+name = "excel_tool"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bitflags = "1"
+path-clean = "1"
+flate2 = "1"
+calamine = "0.29.0"
+colored = "3.0.0"
+heck = "0.5.0"
+rayon = "1.10.0"
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.142"
+toml = "0.9.5"
+url = "2.5.4"
+regex = "1.0"
+dashmap = "6.1.0"
+anyhow = "1.0.100"

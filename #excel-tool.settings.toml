@@ -1,0 +1,92 @@
+# 生成模式 debug/release (debug模式下json会pretty输出)
+mode = "debug"
+# 输入目录
+input = "input"
+# 输出目录
+output = "output"
+# 输出格式: txt/json
+# 特殊规则: 
+# 根据sheet子表名判断: 如果sheet名明确写了格式名后缀比如: sheet1.txt, 则该sheet生成txt文件
+format = "json"
+
+# 是否写入json字段对应原始 excel 位置的 meta 数据, 仅在 debug 模式下生效
+is_write_meta = true
+
+# meta 数据文件后缀, 会生成 json 字段对应在原始 excel 表格的位置用于 debug
+meta_ext = "meta"
+
+# Epsilon
+epsilon = 0.000000001
+
+# 压缩方法 (仅在 release 模式生效)
+zip = "gzip"
+
+# 自定义编码表文件的路径
+# 要求格式: 
+# 1. txt: 以行分隔每个转换项, 每行以空格/制表符分隔key和value
+# 会对(attr)行标记了 encode=custom 的列的单元格的字符进行自定义编码转换, 如果编码表的编码值是数字或可以转为数字的字符串, 则最终生成的json中也是数字
+# abc => 1 将abc转为1
+# def => 2 将def转为2
+custom_encode_map_path = ""
+
+# 表头 key/var 行标记
+row_var_mark = "##var"
+
+# 表头属性 (attr) 标记(用于标记默认值, 字段类型等)
+# 格式: x-www-form-urlencoded
+# 示例: type=string&default=abc&conv=PascalCase
+# 可用attr:
+# type=number/string/bool     列类型, 可为nullable
+#    string
+#    string?
+#    number
+#    number?
+#    bool
+#    bool?
+# default=0                   标记默认值, 当单元格为空的时候, 用默认值填充
+# conv=PascalCase             用于标记列字符串格式化(本配置不区分大小写)
+#    case转换: PascalCase/camelCase/snake_case
+#    进制转换：hex/dec
+#    哈希转换: fnv1a32
+# prefix=abc                  给本列所有字符加上前缀
+# suffix=abc                  给本列所有字符加上后缀
+# encode=custom               给本列所有字符进行编码
+# ignore=0                    当内容是0时, 将不会把本字段写入json对象
+row_attr_mark = "##attr"
+
+# 全局字段名 key 转换格式: 
+# 不转换: 填空(key_case = "") / 删掉 key_case 行 / 注释掉: # key_case = ""
+# 转换为小驼峰: key_case = "camelCase"
+# 转换为大驼峰: key_case = "PascalCase"
+# 转换为Snake:  key_case = "snake_case"
+# 默认为不转换
+key_case = "PascalCase"
+
+# 全局 key 转换表
+# "en" = "en" 代表不转换case
+[global_key_case]
+"en" = "en"
+"zh_CN" = "zh_CN"
+"jp" = "jp"
+
+# 根据 key 的格式转换器
+# 如果列表中标记的正则匹配到某一列的表头key, 则先默认使用标记的属性(attr), 然后再用该列内标记的属性(attr)覆盖
+# "name" = "type=string"         当列key是name的时候, 这一列的类型是string
+# "^id$|.+\\.id$" = "default=0"  当列key是id或者以.id结尾的时候, 这一列默认填充0
+[global_attr_by_key]
+"name" = "type=string"
+"desc" = "type=string"
+"^id$|.+\\.id$" = "default=0"
+"\\.count$" = "type=number&default=0"
+"\\.rate$" = "type=number&default=0"
+
+
+# 定义枚举, 用多行字符串定义
+# 按行解析, 每行一个项, 数字可选, 逗号可选
+# Color = """
+#   Red = 1
+#   Green
+#   Yellow
+#   Blue = 5
+# """
+[enums]
