@@ -238,6 +238,11 @@ fn read_excel(
                 table_result.push(temp_col);
             }
 
+            // 整行都为空的表格行直接跳过
+            if row.iter().all(|cell| cell.is_empty()) {
+                continue;
+            }
+
             // 数据行
             for (col_j, col) in row.iter().enumerate() {
                 if matches!(valid_columns.get(col_j), Some(false)) {
