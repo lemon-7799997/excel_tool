@@ -216,7 +216,7 @@ fn read_excel(
 
                 valid_columns[key_i] = true;
 
-                let mut flat_key = flatten::FlattenKey::new(key_raw.to_string(), |sub_key| {
+                let mut flat_key = flatten::FlattenKey::parse(key_raw.to_string(), |sub_key| {
                     cell_helper::str_converter(cfg.global_key_case.get(sub_key).unwrap_or(&cfg.key_case), sub_key)
                 });
                 match flatten::fill_auto_indexes(&mut flat_key, &mut auto_index_map) {
