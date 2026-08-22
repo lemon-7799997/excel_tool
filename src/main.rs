@@ -151,12 +151,31 @@ fn read_excel(
 
         reports.push(result_helper::SheetResult::new(excel_name, &write_sheet_name, &sheet.name));
         let report_sheet = reports.last_mut().unwrap();
+        
+        let Some(first_cell) = sheet.rows.first().and_then(|v| v.first()) else {
+            continue;
+        };
 
-        let Some(all_rows) = &sheet
-            .rows
-            .get(..)
-            .map(|data| data.iter().map(|r| excel_helper::data_vec_to_string_vec(&r.iter().collect())).collect::<Vec<Vec<String>>>())
-        else {
+        let is_transposed: bool = first_cell.to_string() == cfg.row_transpose_mark;
+
+        let Some(all_rows) = (if is_transposed {
+            &sheet.rows.get(..).map(|data| {
+                let rows_data: Vec<Vec<String>> = data.iter().map(|r| excel_helper::data_vec_to_string_vec(&r.iter().collect())).collect();
+                if rows_data.is_empty() {
+                    return Vec::new();
+                }
+                let max_cols = rows_data.iter().map(|row| row.len()).max().unwrap_or(0);
+                // 转置，缺失的值用空字符串填充
+                (0..max_cols)
+                    .map(|col_idx| rows_data.iter().map(|row| row.get(col_idx).unwrap_or(&String::new()).clone()).collect::<Vec<String>>())
+                    .collect::<Vec<Vec<String>>>()
+            })
+        } else {
+            &sheet
+                .rows
+                .get(..)
+                .map(|data| data.iter().map(|r| excel_helper::data_vec_to_string_vec(&r.iter().collect())).collect::<Vec<Vec<String>>>())
+        }) else {
             continue;
         };
 
@@ -266,7 +285,7 @@ fn read_excel(
                 }
 
                 target_table_row.body.push(cell_json);
-                target_table_row.meta.push((row_i + 1).to_string());
+                target_table_row.meta.push(((if is_transposed { row_i } else { col_j }) + 1).to_string());
             }
         }
 

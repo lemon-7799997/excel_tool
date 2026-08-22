@@ -29,6 +29,9 @@ zip = "gzip"
 # def => 2 将def转为2
 custom_encode_map_path = ""
 
+# transpose转置标记, 只能标记在最左上角单元格
+row_transpose_mark = "##transpose"
+
 # 表头 key/var 行标记
 row_var_mark = "##var"
 

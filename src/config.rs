@@ -18,12 +18,12 @@ fn get_default_meta_ext() -> String {
     "meta".to_string()
 }
 
-fn get_default_row_var_mark() -> String {
-    "##var".to_string()
+fn get_default_row_transpose_mark() -> String {
+    "##transpose".to_string()
 }
 
-fn get_default_row_type_mark() -> String {
-    "##type".to_string()
+fn get_default_row_var_mark() -> String {
+    "##var".to_string()
 }
 
 fn get_default_row_attr_mark() -> String {
@@ -80,6 +80,9 @@ struct Config {
 
     #[serde(default = "get_default_meta_ext")]
     meta_ext: String,
+
+    #[serde(default = "get_default_row_transpose_mark")]
+    row_transpose_mark: String,
 
     #[serde(default = "get_default_row_var_mark")]
     row_var_mark: String,
