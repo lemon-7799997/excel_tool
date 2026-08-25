@@ -151,7 +151,7 @@ fn read_excel(
 
         reports.push(result_helper::SheetResult::new(excel_name, &write_sheet_name, &sheet.name));
         let report_sheet = reports.last_mut().unwrap();
-        
+
         let Some(first_cell) = sheet.rows.first().and_then(|v| v.first()) else {
             continue;
         };
@@ -339,12 +339,6 @@ fn base_dir() -> io::Result<PathBuf> {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    println!("=====================================");
-    println!("> Excel Tool v1.0.0");
-    println!("> Author: Lemon");
-    println!("> Powered by Rust 1.96 & OpenAI GPT-5");
-    println!("=====================================");
-
     let args: Vec<String> = env::args().skip(1).collect();
 
     let base_dir = base_dir()?;
