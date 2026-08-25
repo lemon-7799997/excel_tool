@@ -9,12 +9,14 @@ mod excel_helper;
 mod flatten;
 mod hash;
 mod path_helper;
+mod refer;
 mod result_helper;
 mod vec_helper;
 use cell_helper::CellTypes;
 use cell_helper::TheadAttr;
 
 use calamine::{Cell, DataType};
+use clap::{Parser, Subcommand};
 use colored::*;
 use heck::{ToLowerCamelCase, ToSnakeCase, ToUpperCamelCase};
 use path_clean::PathClean;
@@ -44,6 +46,35 @@ use crate::result_helper::ContentKinds;
 use crate::result_helper::SheetColumn;
 
 include!("config.rs");
+
+#[derive(Parser)]
+#[command(name = "excel-tool", version, about = "Excel 工具: 默认生成功能 + refer 引用 subcommand")]
+struct Cli {
+    /// 工具配置文件路径 (默认 #excel-tool.settings.toml, 相对可执行文件所在目录)
+    #[arg(default_value = "#excel-tool.settings.toml")]
+    config: String,
+
+    /// 调试模式 (兼容旧用法: 传裸词 debug 亦可)
+    #[arg(long)]
+    debug: bool,
+
+    /// 有警告时等待回车再退出
+    #[arg(long)]
+    wait: bool,
+
+    /// 多余的历史参数, 忽略
+    #[arg(hide = true)]
+    rest: Vec<String>,
+
+    #[command(subcommand)]
+    command: Option<Command>,
+}
+
+#[derive(Subcommand)]
+enum Command {
+    /// 引用: 将源 excel 某 sheet 区域数据写入目标 excel 对应位置
+    Refer(refer::ReferArgs),
+}
 
 fn is_in_whitelist(str: &str) -> bool {
     str == "*"
@@ -339,22 +370,25 @@ fn base_dir() -> io::Result<PathBuf> {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let args: Vec<String> = env::args().skip(1).collect();
+    let cli = Cli::parse();
 
+    match cli.command {
+        Some(Command::Refer(args)) => refer::run(args)?,
+        None => run_generate(&cli)?,
+    }
+    Ok(())
+}
+
+fn run_generate(cli: &Cli) -> Result<(), Box<dyn Error>> {
     let base_dir = base_dir()?;
 
-    let config_path = if let Some(arg0) = args.get(0) {
-        let arg0_path = Path::new(arg0);
-        if arg0_path.is_absolute() {
-            arg0_path.to_path_buf()
-        } else {
-            base_dir.join(arg0)
-        }
+    let config_path = if Path::new(&cli.config).is_absolute() {
+        PathBuf::from(&cli.config)
     } else {
-        base_dir.join("#excel-tool.settings.toml")
+        base_dir.join(&cli.config)
     };
 
-    let debug = std::env::args().any(|x| x == "debug");
+    let debug = cli.debug || std::env::args().any(|x| x == "debug");
     DEBUG.store(debug, std::sync::atomic::Ordering::Relaxed);
 
     // 读取生成工具配置
@@ -434,7 +468,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     println!("{}", format!("> 🕒 共用时: {:.6} 秒", execute_start.elapsed().as_secs_f64()).cyan());
 
     println!();
-    if std::env::args().any(|x| x == "--wait") && warn_count > 0 {
+    if cli.wait && warn_count > 0 {
         println!("⚠️ 遇到 {} 个警告, 按下回车退出程序...", warn_count);
         println!();
         let mut buffer = String::new();

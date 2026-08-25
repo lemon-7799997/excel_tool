@@ -4,6 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+clap = { version = "4.5", features = ["derive"] }
+zip = "2.2"
+quick-xml = "0.37"
 bitflags = "1"
 path-clean = "1"
 flate2 = "1"
