@@ -54,17 +54,8 @@ struct Cli {
     #[arg(default_value = "#excel-tool.settings.toml")]
     config: String,
 
-    /// 调试模式 (兼容旧用法: 传裸词 debug 亦可)
     #[arg(long)]
     debug: bool,
-
-    /// 有警告时等待回车再退出
-    #[arg(long)]
-    wait: bool,
-
-    /// 多余的历史参数, 忽略
-    #[arg(hide = true)]
-    rest: Vec<String>,
 
     #[command(subcommand)]
     command: Option<Command>,
@@ -388,8 +379,7 @@ fn run_generate(cli: &Cli) -> Result<(), Box<dyn Error>> {
         base_dir.join(&cli.config)
     };
 
-    let debug = cli.debug || std::env::args().any(|x| x == "debug");
-    DEBUG.store(debug, std::sync::atomic::Ordering::Relaxed);
+    DEBUG.store(cli.debug, std::sync::atomic::Ordering::Relaxed);
 
     // 读取生成工具配置
     let config_content = if Path::new(&config_path).exists() {
@@ -468,11 +458,9 @@ fn run_generate(cli: &Cli) -> Result<(), Box<dyn Error>> {
     println!("{}", format!("> 🕒 共用时: {:.6} 秒", execute_start.elapsed().as_secs_f64()).cyan());
 
     println!();
-    if cli.wait && warn_count > 0 {
+    if warn_count > 0 {
         println!("⚠️ 遇到 {} 个警告, 按下回车退出程序...", warn_count);
         println!();
-        let mut buffer = String::new();
-        io::stdin().read_line(&mut buffer)?;
     }
 
     Ok(())
