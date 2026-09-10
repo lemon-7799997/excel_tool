@@ -23,9 +23,6 @@ struct Cli {
     #[arg(default_value = "#excel-tool.settings.toml")]
     config: String,
 
-    #[arg(long)]
-    debug: bool,
-
     #[command(subcommand)]
     command: Option<Command>,
 }
