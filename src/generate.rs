@@ -563,7 +563,10 @@ pub fn run(cli: &Cli) -> Result<(), Box<dyn std::error::Error>> {
         String::new()
     };
 
-    let cfg: Config = toml::from_str::<Config>(&config_content).expect("> ❌ 配置: 解析配置文件内容失败");
+    let mut cfg: Config = toml::from_str::<Config>(&config_content).expect("> ❌ 配置: 解析配置文件内容失败");
+
+    // 命令行显式传入的参数优先级最高, 覆盖 toml 配置文件中读取到的同名配置项
+    cfg.apply_cli_args(&cli.config_args);
 
     let enums_map: HashMap<String, HashMap<String, i64>> = cfg.enums.clone().into_iter().map(|(name, text)| (name, enum_helper::parse_enum_type(&text))).collect();
 
