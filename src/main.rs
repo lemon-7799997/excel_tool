@@ -459,7 +459,7 @@ fn run_generate(cli: &Cli) -> Result<(), Box<dyn Error>> {
 
     println!();
     if warn_count > 0 {
-        println!("⚠️ 遇到 {} 个警告, 按下回车退出程序...", warn_count);
+        println!("⚠️ 遇到 {} 个警告", warn_count);
         println!();
     }
 
